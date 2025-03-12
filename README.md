@@ -1,1 +1,0 @@
-# SANS-AI-Cybersecurity-Hackathon
