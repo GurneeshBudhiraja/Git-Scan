@@ -36,10 +36,10 @@ export default function Page() {
     async function loadFiles() {
       const files: CodeSnippet[] = await fetchRepoFiles(owner, repo);
       setCodeSnippets(
-        files.map((file) => ({
+        files.map((file, index) => ({
           ...file,
           isOpen: false,
-          isSecure: false,
+          isSecure: index === 0 ? false : true,
           isLoading: false,
         }))
       );
@@ -90,9 +90,22 @@ export default function Page() {
             {codeSnippets.map((snippet, index) => (
               <div
                 key={index}
-                className="group bg-white rounded-lg border transition-all hover:border-gray-300"
+                className="group bg-white rounded-lg border transition-all hover:border-gray-300 relative"
               >
-                <button
+                {!snippet.isSecure && (
+                  <VulnerabilityCard
+                    riskLevel="medium"
+                    riskDescription="Unsafe use of the eval() function allows potential attackers to execute arbitrary code through improper input sanitization."
+                    riskTitle="Code Injection Vulnerability"
+                    riskCode={`function login(user: string, pass: string) {
+                  // Safe implementation using proper function call
+                      authUser(user, pass);
+                  }`}
+                  />
+                )}
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => toggleSnippet(index)}
                   className="w-full flex items-center justify-between px-4 py-3"
                 >
@@ -165,7 +178,7 @@ export default function Page() {
                       </TooltipProvider>
                     )}
                   </div>
-                </button>
+                </div>
 
                 <AnimatePresence>
                   {snippet.isOpen && (
