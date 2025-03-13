@@ -7,3 +7,13 @@ interface CodeSnippet {
   isSecure?: boolean;
   message?: string;
 }
+
+
+type RiskLevel = "low" | "medium" | "high"
+
+interface VulnerabilityCardType {
+  riskLevel: RiskLevel;
+  riskTitle: string;
+  riskDescription: string;
+  riskCode?: string;
+}

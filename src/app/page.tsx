@@ -32,8 +32,8 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#fafafa] px-4 relative overflow-hidden">
-      {/* Enhanced Aceternity-style Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-200/60 to-indigo-100/40" />
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/60 to-indigo-100/60" />
+      {/* Grid Background */}
       <GridBackground />
       <div className="absolute inset-0 bg-[radial-gradient(at_center_40%_20%,#6366f115_0%,transparent_70%)]" />
       <div className="absolute -top-40 left-1/4 w-96 h-96 bg-indigo-300/20 rounded-full mix-blend-soft-light filter blur-[120px] opacity-40" />

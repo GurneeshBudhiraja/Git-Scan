@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import VulnerabilityCard from "@/components/vulnerability-card";
 
 export default function Page() {
   const params = useParams<{ slug: Array<string> }>();
@@ -38,7 +39,7 @@ export default function Page() {
         files.map((file) => ({
           ...file,
           isOpen: false,
-          isSecure: true,
+          isSecure: false,
           isLoading: false,
         }))
       );
@@ -96,15 +97,22 @@ export default function Page() {
                   className="w-full flex items-center justify-between px-4 py-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center">
-                      <span className="text-sm">📄</span>
-                    </div>
-                    <div className="text-left">
-                      <div className="font-medium text-gray-800 text-sm">
-                        {snippet.name.split("/").pop()}
+                    {snippet.isOpen ? (
+                      <ChevronUp className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-gray-400" />
+                    )}
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center">
+                        <span className="text-sm">📄</span>
                       </div>
-                      <div className="text-xs text-gray-400 font-mono mt-1">
-                        {snippet.name}
+                      <div className="text-left">
+                        <div className="font-medium text-gray-800 text-sm">
+                          {snippet.name.split("/").pop()}
+                        </div>
+                        <div className="text-xs text-gray-400 font-mono mt-1">
+                          {snippet.name}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -127,35 +135,34 @@ export default function Page() {
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            {!snippet.isSecure ? (
-                              <ShieldAlert className={cn("text-green-500")} />
-                            ) : (
-                              <Button
-                                variant={"outline"}
-                                className="cursor-pointer h-10 w-10"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log(index);
-                                }}
-                              >
+                            <Button
+                              variant={"outline"}
+                              className={cn("h-10 w-10", {
+                                "cursor-pointer": !snippet.isSecure,
+                              })}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log(index);
+                              }}
+                            >
+                              {snippet.isSecure ? (
+                                <ShieldCheckIcon
+                                  className={cn("text-green-500")}
+                                />
+                              ) : (
                                 <ShieldAlert className="text-red-500" />
-                              </Button>
-                            )}
+                              )}
+                            </Button>
                           </TooltipTrigger>
                           <TooltipContent forceMount>
-                            {!snippet.isSecure ? (
+                            {snippet.isSecure ? (
                               <p>No vulnerabilities found</p>
                             ) : (
-                              <p>Potential vulnerabilities detected</p>
+                              <p>Click to review risks.</p>
                             )}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                    )}
-                    {snippet.isOpen ? (
-                      <ChevronUp className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-gray-400" />
                     )}
                   </div>
                 </button>
