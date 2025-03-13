@@ -10,14 +10,24 @@ export default function HomePage() {
   const [repoUrl, setRepoUrl] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!repoUrl.startsWith("https://github.com/")) {
       setError("Please enter a valid GitHub repository URL");
       return;
     }
+
+    // Extract repo name from URL
+    const repoPath = repoUrl.replace("https://github.com/", "");
+
+    // Validate that we have both username and repository
+    if (!repoPath) {
+      setError("Invalid repository URL format");
+      return;
+    }
+
     setError("");
-    window.location.href = `/results?repo=${encodeURIComponent(repoUrl)}`;
+    window.location.href = `/${repoPath}`;
   };
 
   return (
@@ -49,6 +59,7 @@ export default function HomePage() {
               type="text"
               placeholder="https://github.com/username/repository"
               value={repoUrl}
+              autoFocus={true}
               onChange={(e) => setRepoUrl(e.target.value)}
               className="flex-1 border-0 bg-transparent focus-visible:ring-0 py-5 px-4 text-base placeholder-slate-400 text-slate-900"
             />
