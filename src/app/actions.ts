@@ -1,6 +1,7 @@
 "use server"
 import axios from "axios";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenAI } from "@langchain/openai";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
@@ -9,9 +10,10 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
  * Gemini model constants
  */
 const GEMINI_FLASH_MODEL = "gemini-2.0-flash"
-
-// eslint-disable-next-line
 const GEMINI_PRO_MODEL = "gemini-2.0-pro-exp-02-05"
+
+
+
 
 
 /**
@@ -171,11 +173,9 @@ export async function checkCodeSecurity(code: string): Promise<IsSecureType> {
 
 export async function scanVulnerability(code: string): Promise<VulnerabilityCardProps> {
   try {
-    console.log("CODE 🗒️")
-    console.log(code)
 
     const model = new ChatGoogleGenerativeAI({
-      model: GEMINI_FLASH_MODEL,
+      model: GEMINI_PRO_MODEL,
       temperature: 0,
       apiKey: process.env.NEXT_GEMINI_KEY
     });
@@ -183,7 +183,6 @@ export async function scanVulnerability(code: string): Promise<VulnerabilityCard
     const formatInstructions = "Respond with a valid JSON object, containing the below fields: 'riskLevel', 'riskTitle', 'riskDescription', 'setOpenCard', 'correctCode', 'vulnerabilityCardLoading'";
 
     const parser = new JsonOutputParser<VulnerabilityCardProps>();
-    console.log(parser)
 
     const prompt = ChatPromptTemplate.fromTemplate(
 
@@ -213,6 +212,12 @@ export async function scanVulnerability(code: string): Promise<VulnerabilityCard
       
       Make sure to do proper error handling in the code, if it is required to make the code efficient. Fix the code and vulnerabilities in it as much as possible while making sure it serves its original purpose.
       
+      While correcting the code and mentioning the comments use the industry security standards. 
+
+      Make sure the output that you generate should have the best practices according to the standards set by the below organisations:
+        OWASP (Open Web Application Security Project), NIST (National Institute of Standards and Technology), SANS Institute, ISO/IEC (International Organization for Standardization / International Electrotechnical Commission), CIS (Center for Internet Security), CERT (Computer Emergency Response Team) - Carnegie Mellon University, MITRE Corporation, PCI Security Standards Council
+      It is not mandatory to follow the standards from the above mentioned organisations for each thing, but wherever it is required to follow the industry standards, you should follow them.
+
       While you follow the above instructions, do not overkill the use of a single mechanism to make the codebase safe. Only follow the industry practices.
 
       Take gaps and moments to analyse the code, think during the process, take gaps while answering. There is no need to rush. Go through the generated answer, look for the instructions again to make sure that all the instructions have been followed.
