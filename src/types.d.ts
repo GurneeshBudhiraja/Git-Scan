@@ -9,7 +9,7 @@ interface CodeSnippet {
 }
 
 
-type RiskLevel = "low" | "medium" | "high" | ""
+type RiskLevel = "low" | "medium" | "high" | "" | "error"
 
 type IsSecureType = {
   isSecure: boolean;

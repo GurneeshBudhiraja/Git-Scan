@@ -170,17 +170,15 @@ export async function checkCodeSecurity(code: string): Promise<IsSecureType> {
 /**
   * Use Langchain to get the overview of the text based on the provided code.
  */
-
 export async function scanVulnerability(code: string): Promise<VulnerabilityCardProps> {
   try {
-
     const model = new ChatGoogleGenerativeAI({
       model: GEMINI_PRO_MODEL,
       temperature: 0,
       apiKey: process.env.NEXT_GEMINI_KEY
     });
 
-    const formatInstructions = "Respond with a valid JSON object, containing the below fields: 'riskLevel', 'riskTitle', 'riskDescription', 'setOpenCard', 'correctCode', 'vulnerabilityCardLoading'";
+    const formatInstructions = "Respond with a valid JSON object, containing the below fields: 'riskLevel', 'riskTitle', 'riskDescription', 'setOpenCard', 'correctCode', 'vulnerabilityCardLoading'.";
 
     const parser = new JsonOutputParser<VulnerabilityCardProps>();
 
@@ -210,7 +208,7 @@ export async function scanVulnerability(code: string): Promise<VulnerabilityCard
 
       Since all the spaces and new lines have been taken out of the original code, so it is your duty to add the spaces/linebreaks back where it makes sense. The space could be between the words that had the spaces removed, or any message too.
       
-      Make sure to do proper error handling in the code, if it is required to make the code efficient. Fix the code and vulnerabilities in it as much as possible while making sure it serves its original purpose.
+      Make sure to do proper error handling in the code, if it is required to make the code efficient. Fix the code and vulnerabilities in it as much as possible while making sure it serves its original purpose. The new code that you will return should be in the single string compatible to be parsed to convert from JSON to JS object. 
       
       While correcting the code and mentioning the comments use the industry security standards. 
 
@@ -222,9 +220,14 @@ export async function scanVulnerability(code: string): Promise<VulnerabilityCard
 
       Take gaps and moments to analyse the code, think during the process, take gaps while answering. There is no need to rush. Go through the generated answer, look for the instructions again to make sure that all the instructions have been followed.
 
-      Look at the text and reply in the following format:
+      Do not add anything extra in the final response. Properly follow the format_instructions provided below. Since this will be parsed by the JSON parser so anything extra added would cause the issue. Only return the string containing object that when parsed by the JSON parser works fine without any errors. Do not return any text content or code content separately, all should be in single string that could be parsed to convert it into the JSON object.
+      
+
+      <format_instructions>
         {format_instructions}
-      This is the code:
+      </format_instructions>  
+      
+        This is the code:
         {code}
     `);
 
@@ -242,11 +245,13 @@ export async function scanVulnerability(code: string): Promise<VulnerabilityCard
     console.log("Error while getting the scanVulnerability result:")
     console.log(error)
     return {
-      riskLevel: "",
-      riskTitle: "",
+      riskLevel: "error",
+      riskTitle: "Analysis Failed",
+
       riskDescription: "An error occurred while analyzing the code for vulnerabilities. This could be due to network issues or API limitations. Please try again later.",
-      correctCode: "",
+      correctCode: "Error: Unable to generate a secure version of the code due to the encountered issue.",
       vulnerabilityCardLoading: false
+
     }
   }
 }
