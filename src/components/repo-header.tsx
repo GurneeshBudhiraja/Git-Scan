@@ -7,7 +7,7 @@ import Link from "next/link";
 
 function RepoHeader({ owner, repo }: { owner: string; repo: string }) {
   return (
-    <header className="mb-8 border-b pb-6 mx-10 flex items-center gap-10">
+    <header className="mb-8 border-b pb-6  flex items-center gap-10 max-w-5xl mx-auto">
       <Link href={"/"}>
         <Button variant={"outline"} className="cursor-pointer">
           <HomeIcon className=" text-gray-600" />

@@ -4,7 +4,7 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
-  title: "CodeGuardian AI",
+  title: "GitGuardian",
   description: "",
 };
 

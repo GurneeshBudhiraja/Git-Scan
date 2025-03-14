@@ -9,11 +9,20 @@ interface CodeSnippet {
 }
 
 
-type RiskLevel = "low" | "medium" | "high"
+type RiskLevel = "low" | "medium" | "high" | ""
 
-interface VulnerabilityCardType {
-  riskLevel: RiskLevel;
+type IsSecureType = {
+  isSecure: boolean;
+};
+
+interface VulnerabilityCardContentType {
+  riskLevel: RiskLevel | null;
   riskTitle: string;
   riskDescription: string;
-  riskCode?: string;
+  isSecure: boolean;
+  isCode: boolean;
+}
+
+interface VulnerabilityCardType {
+  repoFileCode: string
 }

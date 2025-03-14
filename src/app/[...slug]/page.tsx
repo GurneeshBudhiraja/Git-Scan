@@ -12,7 +12,11 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
-import fetchRepoFiles from "../actions";
+import {
+  checkCodeSecurity,
+  fetchRepoFiles,
+  scanVulnerability,
+} from "../actions";
 import RepoHeader from "@/components/repo-header";
 import { cn } from "@/lib/utils";
 import {
@@ -33,19 +37,26 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function loadFiles() {
+    async function loadAndAnalyseFiles() {
       const files: CodeSnippet[] = await fetchRepoFiles(owner, repo);
       setCodeSnippets(
-        files.map((file, index) => ({
-          ...file,
-          isOpen: false,
-          isSecure: index === 0 || index === 10 ? false : true,
-          isLoading: false,
-        }))
+        files.map((file) => ({ ...file, isOpen: false, isLoading: true }))
       );
       setLoading(false);
+      for (const [fileIndex, file] of files.entries()) {
+        const { isSecure } = await checkCodeSecurity(
+          file.content.replaceAll(/[\s\n]/g, "")
+        );
+        setCodeSnippets((prev) =>
+          prev.map((prevFile, prevIndex) =>
+            prevIndex !== fileIndex
+              ? { ...prevFile }
+              : { ...prevFile, isSecure, isLoading: false }
+          )
+        );
+      }
     }
-    loadFiles();
+    loadAndAnalyseFiles();
   }, [owner, repo]);
 
   const toggleSnippet = (index: number) => {
@@ -63,14 +74,14 @@ export default function Page() {
 
   return (
     <div className="py-8 px-4">
+      {/* TODO: Remove in production. */}
+      <button onClick={(e) => console.log(codeSnippets)}>
+        See code snippets
+      </button>
       {/* Header */}
       <RepoHeader owner={owner} repo={repo} />
       {/* Code snippets and other content */}
-      <div
-        className={cn("max-w-4xl px-10", {
-          "max-w-7xl mx-auto": codeSnippets.length === 0,
-        })}
-      >
+      <div className={cn("max-w-4xl px-10 mx-auto")}>
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -93,15 +104,8 @@ export default function Page() {
                 className="group bg-white rounded-lg border transition-all hover:border-gray-300 relative"
               >
                 {!snippet.isSecure && (
-                  <VulnerabilityCard
-                    riskLevel="low"
-                    riskDescription="Unsafe use of the eval() function allows potential attackers to execute arbitrary code through improper input sanitization."
-                    riskTitle="Code Injection Vulnerability"
-                    riskCode={`function login(user: string, pass: string) {
-                  // Safe implementation using proper function call
-                      authUser(user, pass);
-                  }`}
-                  />
+                  // <VulnerabilityCard repoFileCode={snippet.content} />
+                  <></>
                 )}
                 <div
                   role="button"
@@ -124,6 +128,7 @@ export default function Page() {
                           {snippet.name.split("/").pop()}
                         </div>
                         <div className="text-xs text-gray-400 font-mono mt-1">
+                          {/* File name */}
                           {snippet.name}
                         </div>
                       </div>
@@ -136,7 +141,7 @@ export default function Page() {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <LoaderCircleIcon className="h-5 w-5 text-indigo-600 animate-spin" />
+                              <LoaderCircleIcon className="h-5 w-5 text-gray-600 animate-spin" />
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Queued for security scan...</p>
@@ -171,7 +176,7 @@ export default function Page() {
                             {snippet.isSecure ? (
                               <p>No vulnerabilities found</p>
                             ) : (
-                              <p>Click to review risks.</p>
+                              <p>Click to review.</p>
                             )}
                           </TooltipContent>
                         </Tooltip>
@@ -197,6 +202,7 @@ export default function Page() {
                           wrapLongLines
                           lineNumberStyle={{ color: "#9CA3AF" }}
                         >
+                          {/* Code snippet */}
                           {snippet.content}
                         </SyntaxHighlighter>
                       </div>
