@@ -43,7 +43,7 @@ export default function HomePage() {
         {/* Header Section */}
         <div className="text-center space-y-3">
           <h1 className="text-4xl font-bold text-slate-900">
-            Git Guardian
+            Git Scan
             <span className="text-indigo-600">.</span>
           </h1>
           <p className="text-slate-600 text-lg font-medium">

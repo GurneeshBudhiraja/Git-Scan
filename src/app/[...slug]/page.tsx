@@ -35,6 +35,7 @@ export default function Page() {
   const [owner, repo] = slug;
   const [codeSnippets, setCodeSnippets] = useState<CodeSnippet[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [clicked, setClicked] = useState<boolean>(true);
 
   useEffect(() => {
     async function loadAndAnalyseFiles() {
@@ -75,13 +76,23 @@ export default function Page() {
   return (
     <div className="py-8 px-4">
       {/* TODO: Remove in production. */}
-      <button onClick={(e) => console.log(codeSnippets)}>
+      <button
+        onClick={() => {
+          setClicked(!clicked);
+          console.log(codeSnippets);
+        }}
+      >
         See code snippets
       </button>
       {/* Header */}
       <RepoHeader owner={owner} repo={repo} />
       {/* Code snippets and other content */}
-      <div className={cn("max-w-4xl px-10 mx-auto")}>
+      <div
+        className={cn("mx-auto px-10 transition-all duration-300 ease-in-out", {
+          "max-w-6xl": clicked,
+          "max-w-4xl": !clicked,
+        })}
+      >
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -97,120 +108,128 @@ export default function Page() {
             <p className="text-gray-500 font-medium">No code files found</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {codeSnippets.map((snippet, index) => (
-              <div
-                key={index}
-                className="group bg-white rounded-lg border transition-all hover:border-gray-300 relative"
-              >
-                {!snippet.isSecure && (
-                  // <VulnerabilityCard repoFileCode={snippet.content} />
-                  <></>
-                )}
+          <div className="flex w-full justify-between gap-4">
+            <div className="space-y-2 w-full">
+              {codeSnippets.map((snippet, index) => (
                 <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => toggleSnippet(index)}
-                  className="w-full flex items-center justify-between px-4 py-3"
+                  key={index}
+                  className="group bg-white rounded-lg border transition-all hover:border-gray-300 relative"
                 >
-                  <div className="flex items-center gap-3">
-                    {snippet.isOpen ? (
-                      <ChevronUp className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-gray-400" />
-                    )}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => toggleSnippet(index)}
+                    className="flex items-center justify-between px-4 py-3"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center">
-                        <span className="text-sm">📄</span>
-                      </div>
-                      <div className="text-left">
-                        <div className="font-medium text-gray-800 text-sm">
-                          {snippet.name.split("/").pop()}
+                      {snippet.isOpen ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400 cursor-pointer" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400 cursor-pointer" />
+                      )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center">
+                          <span className="text-sm">📄</span>
                         </div>
-                        <div className="text-xs text-gray-400 font-mono mt-1">
-                          {/* File name */}
-                          {snippet.name}
+                        <div className="text-left">
+                          <div className="font-medium text-gray-800 text-sm">
+                            {snippet.name.split("/").pop()}
+                          </div>
+                          <div className="text-xs text-gray-400 font-mono mt-1">
+                            {/* File name */}
+                            {snippet.name}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    {snippet.isLoading ? (
-                      // When loading
-                      <>
+                    <div className="flex gap-2 items-center">
+                      {snippet.isLoading ? (
+                        // When loading
+                        <>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <LoaderCircleIcon className="h-5 w-5 text-gray-600 animate-spin" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Queued for security scan...</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      ) : (
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger>
-                              <LoaderCircleIcon className="h-5 w-5 text-gray-600 animate-spin" />
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant={"outline"}
+                                className={cn("h-10 w-10", {
+                                  "cursor-pointer": !snippet.isSecure,
+                                })}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log(index);
+                                }}
+                              >
+                                {snippet.isSecure ? (
+                                  <ShieldCheckIcon
+                                    className={cn("text-green-500")}
+                                  />
+                                ) : (
+                                  <ShieldAlert className="text-red-500" />
+                                )}
+                              </Button>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Queued for security scan...</p>
+                            <TooltipContent forceMount>
+                              {snippet.isSecure ? (
+                                <p>No vulnerabilities found</p>
+                              ) : (
+                                <p>Click to review.</p>
+                              )}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                      </>
-                    ) : (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant={"outline"}
-                              className={cn("h-10 w-10", {
-                                "cursor-pointer": !snippet.isSecure,
-                              })}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                console.log(index);
-                              }}
-                            >
-                              {snippet.isSecure ? (
-                                <ShieldCheckIcon
-                                  className={cn("text-green-500")}
-                                />
-                              ) : (
-                                <ShieldAlert className="text-red-500" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent forceMount>
-                            {snippet.isSecure ? (
-                              <p>No vulnerabilities found</p>
-                            ) : (
-                              <p>Click to review.</p>
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-
-                <AnimatePresence>
-                  {snippet.isOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
-                    >
-                      <div className="border-t">
-                        <SyntaxHighlighter
-                          language={snippet.language || "plaintext"}
-                          style={atomOneLight}
-                          className="p-4 text-sm !font-mono !bg-gray-50"
-                          showLineNumbers
-                          wrapLongLines
-                          lineNumberStyle={{ color: "#9CA3AF" }}
+                  <AnimatePresence>
+                    {snippet.isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                      >
+                        <div
+                          className={cn("border-t w-full", {
+                            "max-w-xl": clicked,
+                          })}
                         >
-                          {/* Code snippet */}
-                          {snippet.content}
-                        </SyntaxHighlighter>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
+                          <SyntaxHighlighter
+                            language={snippet.language || "plaintext"}
+                            style={atomOneLight}
+                            className="p-4 text-sm !font-mono !bg-gray-50 "
+                            showLineNumbers
+                            wrapLongLines
+                            lineNumberStyle={{ color: "#9CA3AF" }}
+                          >
+                            {/* Code snippet */}
+                            {snippet.content}
+                          </SyntaxHighlighter>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+            {clicked && (
+              <VulnerabilityCard
+                riskLevel={"high"}
+                riskTitle="Testing Title"
+                riskDescription="Testing Description"
+              />
+            )}
           </div>
         )}
       </div>

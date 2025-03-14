@@ -19,8 +19,6 @@ interface VulnerabilityCardContentType {
   riskLevel: RiskLevel | null;
   riskTitle: string;
   riskDescription: string;
-  isSecure: boolean;
-  isCode: boolean;
 }
 
 interface VulnerabilityCardType {
