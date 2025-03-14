@@ -35,7 +35,21 @@ export default function Page() {
   const [owner, repo] = slug;
   const [codeSnippets, setCodeSnippets] = useState<CodeSnippet[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [clicked, setClicked] = useState<boolean>(true);
+  const [openCard, setOpenCard] = useState<boolean>(false);
+  const [vulnerabilityCardInfo, setVulnerabilityCardInfo] = useState<
+    Omit<VulnerabilityCardProps, "setOpenCard">
+  >({
+    correctCode: "",
+    riskDescription: "",
+    riskLevel: "",
+    riskTitle: "",
+    vulnerabilityCardLoading: true,
+    codeLanguage: "",
+    codeFileName: "",
+  });
+  const [selectedSnippetIndex, setSelectedSnippetIndex] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     async function loadAndAnalyseFiles() {
@@ -75,22 +89,13 @@ export default function Page() {
 
   return (
     <div className="py-8 px-4">
-      {/* TODO: Remove in production. */}
-      <button
-        onClick={() => {
-          setClicked(!clicked);
-          console.log(codeSnippets);
-        }}
-      >
-        See code snippets
-      </button>
       {/* Header */}
       <RepoHeader owner={owner} repo={repo} />
       {/* Code snippets and other content */}
       <div
         className={cn("mx-auto px-10 transition-all duration-300 ease-in-out", {
-          "max-w-6xl": clicked,
-          "max-w-4xl": !clicked,
+          "max-w-7xl": openCard,
+          "max-w-4xl": !openCard,
         })}
       >
         {loading ? (
@@ -109,11 +114,18 @@ export default function Page() {
           </div>
         ) : (
           <div className="flex w-full justify-between gap-4">
-            <div className="space-y-2 w-full">
+            <div
+              className={cn("space-y-2 w-full", {
+                "w-1/2": openCard,
+              })}
+            >
               {codeSnippets.map((snippet, index) => (
                 <div
                   key={index}
-                  className="group bg-white rounded-lg border transition-all hover:border-gray-300 relative"
+                  className={cn(
+                    "group rounded-lg border transition-all hover:border-gray-300 relative",
+                    selectedSnippetIndex === index ? "bg-gray-100" : "bg-white"
+                  )}
                 >
                   <div
                     role="button"
@@ -162,13 +174,41 @@ export default function Page() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
+                                disabled={
+                                  vulnerabilityCardInfo.vulnerabilityCardLoading &&
+                                  openCard
+                                }
                                 variant={"outline"}
                                 className={cn("h-10 w-10", {
                                   "cursor-pointer": !snippet.isSecure,
                                 })}
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                   e.stopPropagation();
-                                  console.log(index);
+                                  if (snippet.isSecure) return;
+
+                                  setVulnerabilityCardInfo(() => ({
+                                    vulnerabilityCardLoading: true,
+                                    correctCode: "",
+                                    riskDescription: "",
+                                    riskLevel: "",
+                                    riskTitle: "",
+                                    codeLanguage: "",
+                                  }));
+                                  setSelectedSnippetIndex(index);
+                                  setOpenCard(true);
+                                  const formattedCode =
+                                    snippet.content?.replaceAll(/[\s\n]/g, "");
+
+                                  const scanVulnerabilityResponse =
+                                    await scanVulnerability(formattedCode);
+
+                                  setVulnerabilityCardInfo((prev) => ({
+                                    ...prev,
+                                    ...scanVulnerabilityResponse,
+                                    codeLanguage: snippet.language,
+                                    codeFileName: snippet.name,
+                                    vulnerabilityCardLoading: false,
+                                  }));
                                 }}
                               >
                                 {snippet.isSecure ? (
@@ -202,7 +242,7 @@ export default function Page() {
                       >
                         <div
                           className={cn("border-t w-full", {
-                            "max-w-xl": clicked,
+                            "max-w-xl": openCard,
                           })}
                         >
                           <SyntaxHighlighter
@@ -223,11 +263,19 @@ export default function Page() {
                 </div>
               ))}
             </div>
-            {clicked && (
+            {openCard && (
               <VulnerabilityCard
-                riskLevel={"high"}
-                riskTitle="Testing Title"
-                riskDescription="Testing Description"
+                riskLevel={vulnerabilityCardInfo.riskLevel}
+                riskTitle={vulnerabilityCardInfo.riskTitle}
+                riskDescription={vulnerabilityCardInfo.riskDescription}
+                correctCode={vulnerabilityCardInfo.correctCode}
+                setOpenCard={setOpenCard}
+                vulnerabilityCardLoading={
+                  vulnerabilityCardInfo.vulnerabilityCardLoading
+                }
+                codeLanguage={vulnerabilityCardInfo.codeLanguage}
+                codeFileName={vulnerabilityCardInfo.codeFileName}
+                setSelectedSnippetIndex={setSelectedSnippetIndex}
               />
             )}
           </div>

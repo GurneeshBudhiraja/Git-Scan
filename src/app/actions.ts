@@ -113,7 +113,7 @@ export async function fetchRepoFiles(
 /**
  * Checks whether the code has safety issue or not.
  */
-export async function checkCodeSecurity(repoFileCode: string): Promise<IsSecureType> {
+export async function checkCodeSecurity(code: string): Promise<IsSecureType> {
   try {
     const model = new ChatGoogleGenerativeAI({
       model: GEMINI_FLASH_MODEL,
@@ -152,7 +152,7 @@ export async function checkCodeSecurity(repoFileCode: string): Promise<IsSecureT
 
     const chain = partialedPrompt.pipe(model).pipe(parser);
 
-    const chainResponse = await chain.invoke({ codeSnippet: `${repoFileCode}` });
+    const chainResponse = await chain.invoke({ codeSnippet: `${code}` });
 
     return chainResponse
   } catch (error) {
@@ -169,10 +169,10 @@ export async function checkCodeSecurity(repoFileCode: string): Promise<IsSecureT
   * Use Langchain to get the overview of the text based on the provided code.
  */
 
-export async function scanVulnerability(repoFileCode: string): Promise<VulnerabilityCardContentType> {
+export async function scanVulnerability(code: string): Promise<VulnerabilityCardProps> {
   try {
-    console.log("REPO FILE CODE 🗒️")
-    console.log(repoFileCode)
+    console.log("CODE 🗒️")
+    console.log(code)
 
     const model = new ChatGoogleGenerativeAI({
       model: GEMINI_FLASH_MODEL,
@@ -180,12 +180,48 @@ export async function scanVulnerability(repoFileCode: string): Promise<Vulnerabi
       apiKey: process.env.NEXT_GEMINI_KEY
     });
 
-    const formatInstructions = "Respond with a valid JSON object, containing two fields: 'riskLevel', 'riskTitle','riskDescription', 'isSecure' and 'isCode'";
-    const parser = new JsonOutputParser<VulnerabilityCardContentType>();
+    const formatInstructions = "Respond with a valid JSON object, containing the below fields: 'riskLevel', 'riskTitle', 'riskDescription', 'setOpenCard', 'correctCode', 'vulnerabilityCardLoading'";
+
+    const parser = new JsonOutputParser<VulnerabilityCardProps>();
+    console.log(parser)
 
     const prompt = ChatPromptTemplate.fromTemplate(
-      "While looking at the code snippet, do not look at the grammar or correction. Your job is to look for vulnerabilites in the code. If the code snippet is not the code in that case by default the text passed would be considered as secure and you can keep the other fields empty string or anything that goes well with the format instructions. Please make sure that you can leave the description string empty if you think the provided text is not code or the provided text contains the code that has no vulnerability issues. Look at the text and reply in the following format:.\n{format_instructions}\n{codeSnippet}\n"
-    );
+
+      ` 
+      You are a helpful agent which has a great speciality in finding vulnerabilites in the code. There are 3 levels of vulnerabilites you have to look in the code, which are 
+        'low', 'medium', and 'hard'.
+        
+      Make sure to keep the riskTitle and riskDescription as concise as possible. This is just to give idea to the user exactly what is the problem. This should not be detailed analysis. 
+
+      Your main goal is to find vulnerabilities or code that could make the code base prone to future attacks based on the vulnerabilities.
+
+      You will be provided with the code whose line breaks, spaces and other formatting things that makes the code look beautiful has been removed. Please assume that the original code has been properly formatted.
+
+      You do not flag the spelling or grammar mistakes in the code as long as they are not the part of some sort of vulnerability. 
+
+      The modified code that you will provide should be returned as the single string, properly formatted using line breaks, spaces, and other characters that makes it beautiful. The new code should have the vulnerability fixed. 
+
+      Add the comments where it is required to explain and improve the readability of the code. 
+
+      Only change the UI and UX of the code if it has been implemented in such a way that it could open some loopholes in the overall safety of the application.
+
+      Do not add any text in the code that does not improve the codebase in terms of functionality/readability/other factors.  
+
+      Make sure that the correct code that you generate should have actually fixed the vulnerability. 
+
+      Since all the spaces and new lines have been taken out of the original code, so it is your duty to add the spaces/linebreaks back where it makes sense. The space could be between the words that had the spaces removed, or any message too.
+      
+      Make sure to do proper error handling in the code, if it is required to make the code efficient. Fix the code and vulnerabilities in it as much as possible while making sure it serves its original purpose.
+      
+      While you follow the above instructions, do not overkill the use of a single mechanism to make the codebase safe. Only follow the industry practices.
+
+      Take gaps and moments to analyse the code, think during the process, take gaps while answering. There is no need to rush. Go through the generated answer, look for the instructions again to make sure that all the instructions have been followed.
+
+      Look at the text and reply in the following format:
+        {format_instructions}
+      This is the code:
+        {code}
+    `);
 
     const partialedPrompt = await prompt.partial({
       format_instructions: formatInstructions,
@@ -193,8 +229,7 @@ export async function scanVulnerability(repoFileCode: string): Promise<Vulnerabi
 
     const chain = partialedPrompt.pipe(model).pipe(parser);
 
-    const chainResponse = await chain.invoke({ codeSnippet: repoFileCode });
-    console.log(chainResponse)
+    const chainResponse = await chain.invoke({ code: code });
 
     return chainResponse
 
@@ -204,10 +239,9 @@ export async function scanVulnerability(repoFileCode: string): Promise<Vulnerabi
     return {
       riskLevel: "",
       riskTitle: "",
-      isSecure: null,
-      isCode: true,
-      riskDescription: "An error occurred while analyzing the code for vulnerabilities. This could be due to network issues or API limitations. Please try again later."
-
+      riskDescription: "An error occurred while analyzing the code for vulnerabilities. This could be due to network issues or API limitations. Please try again later.",
+      correctCode: "",
+      vulnerabilityCardLoading: false
     }
   }
 }

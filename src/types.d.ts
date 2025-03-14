@@ -21,6 +21,12 @@ interface VulnerabilityCardContentType {
   riskDescription: string;
 }
 
-interface VulnerabilityCardType {
-  repoFileCode: string
+interface VulnerabilityCardProps extends VulnerabilityCardContentType {
+  setOpenCard?: React.Dispatch<React.SetStateAction<boolean>>;
+  codeLanguage?: string;
+  correctCode: string;
+  vulnerabilityCardLoading: boolean;
+  codeFileName?: string;
 }
+
+
