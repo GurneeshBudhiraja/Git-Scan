@@ -39,7 +39,7 @@ export default function Page() {
         files.map((file, index) => ({
           ...file,
           isOpen: false,
-          isSecure: index === 0 ? false : true,
+          isSecure: index === 0 || index === 10 ? false : true,
           isLoading: false,
         }))
       );
@@ -94,7 +94,7 @@ export default function Page() {
               >
                 {!snippet.isSecure && (
                   <VulnerabilityCard
-                    riskLevel="medium"
+                    riskLevel="low"
                     riskDescription="Unsafe use of the eval() function allows potential attackers to execute arbitrary code through improper input sanitization."
                     riskTitle="Code Injection Vulnerability"
                     riskCode={`function login(user: string, pass: string) {
