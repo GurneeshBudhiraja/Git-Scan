@@ -188,40 +188,41 @@ export async function scanVulnerability(code: string): Promise<VulnerabilityCard
       You are a helpful agent which has a great speciality in finding vulnerabilites in the code. There are 3 levels of vulnerabilites you have to look in the code, which are 
         'low', 'medium', and 'hard'.
         
-      Make sure to keep the riskTitle and riskDescription as concise as possible. This is just to give idea to the user exactly what is the problem. This should not be detailed analysis. 
-
       Your main goal is to find vulnerabilities or code that could make the code base prone to future attacks based on the vulnerabilities.
 
       You will be provided with the code whose line breaks, spaces and other formatting things that makes the code look beautiful has been removed. Please assume that the original code has been properly formatted.
 
-      You do not flag the spelling or grammar mistakes in the code as long as they are not the part of some sort of vulnerability. 
+      Make sure to keep the riskTitle and riskDescription as concise as possible. This is just to give idea to the user exactly what is the problem. This should not be detailed analysis. 
 
-      The modified code that you will provide should be returned as the single string, properly formatted using line breaks, spaces, and other characters that makes it beautiful. The new code should have the vulnerability fixed. 
+      Do not flag the spelling or grammar mistakes in the code as long as they are not the part of vulnerability. 
 
       Add the comments where it is required to explain and improve the readability of the code. 
 
-      Only change the UI and UX of the code if it has been implemented in such a way that it could open some loopholes in the overall safety of the application.
+      Only change the UI and UX only if it introduces any vulnerabilites.
+      
+      Do not add any text in the code that does not improve the codebase in terms of functionality/readability/other factors.
 
-      Do not add any text in the code that does not improve the codebase in terms of functionality/readability/other factors.  
-
-      Make sure that the correct code that you generate should have actually fixed the vulnerability. 
+      The correct code that you generate should have actually fixed the vulnerability.
+      The title and description of the title should be short and concise. It does not needs to be long since this would just be used to give the idea to the user what it would be about.
 
       Since all the spaces and new lines have been taken out of the original code, so it is your duty to add the spaces/linebreaks back where it makes sense. The space could be between the words that had the spaces removed, or any message too.
       
-      Make sure to do proper error handling in the code, if it is required to make the code efficient. Fix the code and vulnerabilities in it as much as possible while making sure it serves its original purpose. The new code that you will return should be in the single string compatible to be parsed to convert from JSON to JS object. 
+      Make sure to do proper error handling in the code, if it is required to make the code efficient. 
+      Fix the code and vulnerabilities in it as much as possible while making sure it serves its original purpose.
       
       While correcting the code and mentioning the comments use the industry security standards. 
 
-      Make sure the output that you generate should have the best practices according to the standards set by the below organisations:
+      Make sure the output that you generate should have the best practices followed according to the standards set by the below organisations:
         OWASP (Open Web Application Security Project), NIST (National Institute of Standards and Technology), SANS Institute, ISO/IEC (International Organization for Standardization / International Electrotechnical Commission), CIS (Center for Internet Security), CERT (Computer Emergency Response Team) - Carnegie Mellon University, MITRE Corporation, PCI Security Standards Council
-      It is not mandatory to follow the standards from the above mentioned organisations for each thing, but wherever it is required to follow the industry standards, you should follow them.
+      It is not mandatory to follow all the above standards for each and every thing, but wherever it is required to follow the industry standards, you should follow them.
 
       While you follow the above instructions, do not overkill the use of a single mechanism to make the codebase safe. Only follow the industry practices.
 
       Take gaps and moments to analyse the code, think during the process, take gaps while answering. There is no need to rush. Go through the generated answer, look for the instructions again to make sure that all the instructions have been followed.
 
-      Do not add anything extra in the final response. Properly follow the format_instructions provided below. Since this will be parsed by the JSON parser so anything extra added would cause the issue. Only return the string containing object that when parsed by the JSON parser works fine without any errors. Do not return any text content or code content separately, all should be in single string that could be parsed to convert it into the JSON object.
-      
+      Do not generate any instructions or other extra text content. Only return the string containing the keys and values as mentioned in below format_instructions. This string should be structured such that it could be successfully parsed into JSON format. This is the reason why I am insisting not to generate any extra text as that would be useless and in the end only the JSON content in required and shown to the user.       
+
+      Take gaps and pauses to think and analyse. Go through the above and below mentioned instructions to generate the output as mentioned. Additionally, I want you to properly analyse the code, and instructions before you generate the output. Do not forget to take gaps and pauses. 
 
       <format_instructions>
         {format_instructions}
@@ -238,6 +239,8 @@ export async function scanVulnerability(code: string): Promise<VulnerabilityCard
     const chain = partialedPrompt.pipe(model).pipe(parser);
 
     const chainResponse = await chain.invoke({ code: code });
+
+    console.log(chainResponse)
 
     return chainResponse
 

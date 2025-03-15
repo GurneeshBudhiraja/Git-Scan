@@ -196,11 +196,11 @@ export default function Page() {
                                   }));
                                   setSelectedSnippetIndex(index);
                                   setOpenCard(true);
-                                  const formattedCode =
-                                    snippet.content?.replaceAll(/[\s\n]/g, "");
+                                  // const formattedCode =
+                                  //   snippet.content?.replaceAll(/[\s\n]/g, "");
 
                                   const scanVulnerabilityResponse =
-                                    await scanVulnerability(formattedCode);
+                                    await scanVulnerability(snippet.content);
 
                                   setVulnerabilityCardInfo((prev) => ({
                                     ...prev,
