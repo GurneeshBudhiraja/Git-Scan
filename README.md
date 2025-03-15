@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitScan - AI-Powered Security Scanner for GitHub Repositories
 
-## Getting Started
+![GitScan](https://github.com/user-attachments/assets/3a5c884c-dc0e-48d6-bdbe-b2bcfe9edeb6)
 
-First, run the development server:
+## 🚀 Overview
+GitScan is an **AI-powered security tool** that scans public GitHub repositories for **vulnerabilities, misconfigurations, and exposed secrets**—giving developers instant, actionable insights to secure their code. Built for the **SANS AI Cybersecurity Hackathon 2025**, it aims to simplify security analysis for developers.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🔥 Features
+- **Automated AI-Powered Security Scanning** - Instantly detects vulnerabilities in repositories.
+- **Detects Exposed Secrets & Misconfigurations** - Flags API keys, authentication flaws, and weak security practices.
+- **Actionable AI-Powered Fixes & Insights** - Provides explanations with recommended fixes.
+- **Simple GitHub Integration** - Scan by entering a repository URL or using `git-scan.com` as a replacement for `github.com`.
+- **Developer-Friendly UX** - No complex setup or security expertise required.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ How It Works
+1. **Enter a GitHub URL** to scan.
+2. The AI model analyzes the codebase for vulnerabilities.
+3. **Security issues are flagged**, categorized by severity.
+4. AI provides **fix recommendations**, allowing developers to improve security effortlessly.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Built With
+- **Frontend:** Next.js 15, Tailwind CSS
+- **Backend:** Next.js 15
+- **AI Integration:** Google Gemini via LangChain
+- **Deployment:** Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Installation & Setup
+### Steps to Run Locally
+1. **Clone the repository:**  
+   ```sh
+   git clone https://github.com/GurneeshBudhiraja/Git-Scan.git
+   cd Git-Scan
+   ```
+2. **Install dependencies:**  
+   ```sh
+   npm install
+   ```
+3. **Run the development server:**  
+   ```sh
+   npm run dev
+   ```
+4. **Open in browser:**  
+   Visit `http://localhost:3000`
 
-## Learn More
+## ⚡ Challenges Overcome
+- Efficient **parsing of large repositories** for real-time security insights.
+- Optimizing AI-generated security explanations to be **developer-friendly**.
+- Balancing performance while keeping API calls **cost-effective**.
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Future Enhancements
+- 🔹 **CI/CD Integration** - Automate security checks in pipelines.
+- 🔹 **Private Repo Support** - Secure authentication for scanning private repositories.
+- 🔹 **Expanded AI Models** - More advanced vulnerability detection.
+- 🔹 **Automated PR Comments** - AI-suggested fixes in GitHub pull requests.
+- 🔹 **Multi-Platform Support** - Extend beyond GitHub to GitLab, Bitbucket, etc.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏆 Meeting Hackathon Standards
+GitScan aligns with the **SANS AI Cybersecurity Hackathon** judging criteria:
+- **Innovation & Impact:** AI-powered automation reduces manual security effort.
+- **Technical Execution:** Built using Next.js 15, LangChain, and Gemini AI.
+- **Practicality & Usability:** Developer-friendly, requiring minimal setup.
+- **Scalability & Future Enhancements:** Plans for CI/CD, private repo scanning, and deeper AI insights.
+- **Relevance to Cybersecurity:** Identifies **code misconfigurations, weak authentication, hardcoded secrets**, and other risks.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📜 License
+This project is **open-source** under the [MIT License](LICENSE).
